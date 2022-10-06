@@ -1,0 +1,43 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model games {
+  id          Int         @id @default(autoincrement())
+  name        String?     @unique(map: "name_UNIQUE") @db.VarChar(80)
+  duration    Int?
+  rounds      Int?
+  pointWeight Int?
+  createdAt   DateTime?   @db.Timestamp(6)
+  updatedAt   DateTime?   @db.Timestamp(6)
+  usergames   usergames[]
+}
+
+model users {
+  id        Int         @id @default(autoincrement())
+  name      String?     @db.VarChar(120)
+  nickname  String      @unique(map: "nickname_UNIQUE") @db.VarChar(50)
+  phone     String      @db.VarChar(45)
+  createdAt DateTime?   @db.Timestamp(6)
+  usergames usergames[]
+}
+
+model usergames {
+  id         Int       @id @default(autoincrement())
+  userId     Int?
+  gameId     Int?
+  hits       Int?
+  playedTime Int?
+  score      Int?
+  createdAt  DateTime? @db.Timestamp(6)
+  games      games?    @relation(fields: [gameId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_usergames_game")
+  users      users?    @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_usergames_user")
+
+  @@index([gameId], map: "fk_usergames_game_idx")
+  @@index([userId], map: "fk_usergames_user_idx")
+}
